@@ -1,39 +1,23 @@
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
+import { connect } from 'react-redux';
+
 import boardStyles from './../Board/Board.css';
 import styles from './Boards.css';
 
-import Axios from 'axios';
+import * as actions from './../../store/actions/index';
 
 class Boards extends Component {
-    state = {
-        boardData: {},
-        serverError: false
-    }
-
     componentDidMount = () => {
-        Axios.get('https://pro-organizer-f83b5.firebaseio.com/boardData.json')
-            .then(response => {
-                for(let value in response.data) {
-                    this.setState({
-                        boardData: response.data[value]
-                    })
-                }
-            })
-            .catch(error => {
-                console.log(error);
-                this.setState({
-                    serverError: true
-                })
-            });
+        this.props.initBoards();
     }
 
     render() {
         let boards = null;
 
-        if(this.state.serverError === false) {
-            Object.keys(this.state.boardData).length > 0 ?
-            boards = this.state.boardData.allBoards.map(boards => {
+        if(this.props.serverError === false) {
+            Object.keys(this.props.boardData).length > 0 ?
+            boards = this.props.boardData.allBoards.map(boards => {
                 return (
                     <Link 
                         to={{
@@ -62,4 +46,17 @@ class Boards extends Component {
     }
 }
 
-export default Boards;
+const mapStateToProps = state => {
+    return {
+        boardData: state.boards.boardData,
+        serverError: state.boards.serverError
+    }
+}
+
+const mapDispatchToProps = dispatch => {
+    return {
+        initBoards: () => dispatch(actions.initBoards())
+    }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(Boards);

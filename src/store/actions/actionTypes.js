@@ -1,0 +1,2 @@
+export const GET_BOARDS = 'GET_BOARDS';
+export const GET_BOARDS_FAILED = 'GET_BOARDS_FAILED';
