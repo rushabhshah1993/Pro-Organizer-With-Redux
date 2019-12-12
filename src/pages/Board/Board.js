@@ -208,27 +208,26 @@ class Board extends Component {
     }
 
     deleteColumnHandler = (column_id) => {
-        let boardData = {...this.state.boardData};
-        let cards = boardData.cards;
-        let columns = boardData.columns;
+        let updatedBoardData = {...this.props.boardData};
+        let columnBoardData = {...this.props.boardData.boards[this.props.match.params.boardId]};
+        let cards = columnBoardData.cards;
+        let columns = columnBoardData.columns;
         let updatedCards = cards.filter(card => {
             return card.column !== column_id;
         })
         let updatedColumns = columns.filter(column => {
             return column.id !== column_id;
         })
-        boardData.cards = updatedCards;
-        boardData.columns = updatedColumns;
-        Axios.put('https://pro-organizer-f83b5.firebaseio.com/boardData/-LuM4blPg67eyvzgAzwn/boards/'+this.state.boardData.id+'.json', boardData)
-            .then(response => {
-                this.setState({
-                    boardData: boardData
-                })
-            })
+        columnBoardData.cards = updatedCards;
+        columnBoardData.columns = updatedColumns;
+        updatedBoardData.boards[this.props.match.params.boardId] = columnBoardData;
+        Axios.put('https://pro-organizer-f83b5.firebaseio.com/boardData/-LuM4blPg67eyvzgAzwn.json', updatedBoardData)
+            .then(response => {this.props.updateBoardData(updatedBoardData);})
             .catch(error => {console.log(error);})
     }
 
     deleteBoardHandler = () => {
+        console.log('Here');
         Axios.get('https://pro-organizer-f83b5.firebaseio.com/boardData/-LuM4blPg67eyvzgAzwn.json')
             .then(response => {
                 let appData = {...response.data};
