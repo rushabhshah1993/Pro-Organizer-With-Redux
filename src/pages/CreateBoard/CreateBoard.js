@@ -39,31 +39,11 @@ class CreateBoard extends Component {
                 id: 'type',
                 value: null
             }
-        ],
-        allBoards: [],
-        allBoardsData: { }
-    }
-
-    componentDidMount = () => {
-        Axios.get('https://pro-organizer-f83b5.firebaseio.com/boardData/-LuM4blPg67eyvzgAzwn/allBoards.json')
-            .then(response => {
-                this.setState({
-                    allBoards: response.data
-                })
-            })
-            .catch(error => {console.log(error)});
-
-        Axios.get('https://pro-organizer-f83b5.firebaseio.com/boardData/-LuM4blPg67eyvzgAzwn/boards.json')
-            .then(response => {
-                this.setState({
-                    allBoardsData: response.data
-                })
-            })
-            .catch(error => {console.log(error)});
+        ]
     }
 
     createBoardHandler = () => {
-        let boards = this.state.allBoards !== null ? [...this.state.allBoards] : [];
+        let boards = this.props.boardData.allBoards !== null ? [...this.props.boardData.allBoards] : [];
         let formElements = {...this.state.formElements};
         let id = 'board' + (boards.length + 1);
         let newBoard = {
