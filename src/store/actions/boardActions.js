@@ -14,8 +14,22 @@ export const getBoardsFailed = () => {
     }
 }
 
+export const updateBoardData = (boardData) => {
+    return {
+        type: actionTypes.UPDATE_BOARD_DATA,
+        payload: boardData
+    }
+}
+
+export const initGetBoard = () => {
+    return {
+        type: actionTypes.INIT_GET_BOARDS
+    }
+}
+
 export const initBoards = () => {
     return dispatch => {
+        dispatch(initGetBoard());
         Axios.get('https://pro-organizer-f83b5.firebaseio.com/boardData.json')
             .then(response =>  {
                 let boardData = {};

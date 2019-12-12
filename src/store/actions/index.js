@@ -1,4 +1,5 @@
 export {
     initBoards,
-    getBoards
+    getBoards,
+    updateBoardData
 } from './boardActions';
