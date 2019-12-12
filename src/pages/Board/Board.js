@@ -53,12 +53,12 @@ class Board extends Component {
     }
 
     cardClickHandler = (card_details) => {
-        let boardData = this.state.boardData;
-        let cardData = boardData.cards.filter(card => {
+        let columnBoardData = this.props.boardData.boards[this.props.match.params.boardId];
+        let cardData = columnBoardData.cards.filter(card => {
             return card.id === card_details.card_id;
         });
         let selectedCardData = {};
-        let columnData = boardData.columns.filter(column => {
+        let columnData = columnBoardData.columns.filter(column => {
             return column.id === cardData[0].column;
         })
         selectedCardData.card = cardData;
@@ -115,27 +115,27 @@ class Board extends Component {
     }
 
     addCardToDBHandler = (values) => {
+        let columnBoardData = {...this.props.boardData.boards[this.props.match.params.boardId]};
+        let updatedBoardData = {...this.props.boardData};
+
         values['due_date'] = values['due_date'] !== null ? new Date(values['due_date']).getTime() : null;
-        values['board_id'] = this.state.boardData.id;
+        values['board_id'] = columnBoardData.id;
         values['column'] = this.state.addCardToColumnID;
-        values['id'] = this.state.boardData.cards ? this.state.boardData.cards.slice(-1)[0].id + 1 : 0;
+        values['id'] = columnBoardData.cards ? columnBoardData.cards.slice(-1)[0].id + 1 : 0;
         
-        let cards = this.state.boardData.cards || [];
+        let cards = [...columnBoardData.cards] || [];
         cards.push(values);
-
-        let boardData = {...this.state.boardData};
-        boardData.cards = cards;
-
-        let url = 'https://pro-organizer-f83b5.firebaseio.com/boardData/-LuM4blPg67eyvzgAzwn/boards/'+this.state.boardData.id+'/cards.json';
-        Axios.put(url, cards)
+        columnBoardData.cards = cards;
+        updatedBoardData.boards[this.props.match.params.boardId] = columnBoardData;
+        Axios.put('https://pro-organizer-f83b5.firebaseio.com/boardData/-LuM4blPg67eyvzgAzwn.json', updatedBoardData)
             .then(response => {
+                this.props.updateBoardData(updatedBoardData);
                 this.setState({
                     showAddCardModal: false,
-                    addCardToColumnID: null,
-                    boardData: boardData
+                    addCardToColumnID: null
                 })
             })
-            .catch(error => {console.log(error);}) 
+            .catch(error => {console.log(error);})
     }
 
     addColumnHandler = () => {
@@ -326,7 +326,7 @@ class Board extends Component {
                         this.state.showEditModal ?
                         <Modal 
                             content={
-                                <AddCard members={this.state.boardData.members} addCard={this.addEditedCardToDBHandler} editCard={true} cardData={this.state.selectedCardData} />
+                                <AddCard members={this.props.boardData.boards[this.props.match.params.boardId].members} addCard={this.addEditedCardToDBHandler} editCard={true} cardData={this.state.selectedCardData} />
                             } 
                             close={this.closeEditModalHandler} 
                         /> : 
