@@ -75,13 +75,24 @@ class AddCard extends Component {
         values['board_id'] = columnBoardData.id;
         values['column'] = this.props.columnID;
         values['id'] = columnBoardData.cards ? columnBoardData.cards.slice(-1)[0].id + 1 : 0;
+        values['due_date'] = values['due_date'] !== 'NaN-NaN-NaN' ? new Date(values['due_date']).getTime() : null;
 
-        let cards = [...columnBoardData.cards] || [];
-        cards.push(values);
 
-        columnBoardData.cards = cards;
+        if(this.props.editCard) {
+            let id = this.props.cardData.card[0].id;
+            let cardData = columnBoardData.cards.filter(card => {return card.id === id});
+            for(let key in values) {
+                cardData[0][key] = values[key];
+            }
+            updatedBoardData.boards[this.props.boardID] = columnBoardData;
+        } else {
+            let cards = [...columnBoardData.cards] || [];
+            cards.push(values);
 
-        updatedBoardData.boards[this.props.boardID] = columnBoardData;
+            columnBoardData.cards = cards;
+
+            updatedBoardData.boards[this.props.boardID] = columnBoardData;
+        }
 
         Axios.put('https://pro-organizer-f83b5.firebaseio.com/boardData/-LuM4blPg67eyvzgAzwn.json', updatedBoardData)
             .then(response => {this.props.addCard()})
@@ -103,7 +114,6 @@ class AddCard extends Component {
     }
 
     render() {
-        console.log(this.props);
         let formElements = this.state.formElements.map(element => {
             const ref = React.createRef();
             return <FormElements element={element} reference={ref} key={element.id} options={element.id === 'members' && this.props.members} changed={this.formChangeHandler} />

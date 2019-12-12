@@ -96,22 +96,10 @@ class Board extends Component {
         })
     }
 
-    addEditedCardToDBHandler = (values) => {
-        let id = this.state.selectedCardData.card[0].id;
-        let boardData = {...this.state.boardData};
-        let cardData = boardData.cards.filter(card => {return card.id === id});
-        for(let key in values) {
-            cardData[0][key] = values[key];
-        }
-        let url = 'https://pro-organizer-f83b5.firebaseio.com/boardData/-LuM4blPg67eyvzgAzwn/boards/'+boardData.id+'.json';
-        Axios.put(url, boardData)
-            .then(response => {
-                this.setState({
-                    boardData: boardData,
-                    showEditModal: false
-                })
-            })
-            .catch(error => {console.log(error)});
+    addEditedCardToDBHandler = () => {
+        this.setState({
+            showEditModal: false
+        })
     }
 
     addCardToDBHandler = () => {
@@ -299,7 +287,7 @@ class Board extends Component {
                         this.state.showAddCardModal ?
                         <Modal 
                             content={
-                                <AddCard members={this.state.boardData.members} addCard={this.addCardToDBHandler} boardID={this.props.match.params.boardId} columnID={this.state.addCardToColumnID} />
+                                <AddCard members={this.props.boardData.boards[this.props.match.params.boardId].members} addCard={this.addCardToDBHandler} boardID={this.props.match.params.boardId} columnID={this.state.addCardToColumnID} />
                             } 
                             close={this.closeAddCardModalHandler} 
                         /> : 
@@ -309,7 +297,7 @@ class Board extends Component {
                         this.state.showEditModal ?
                         <Modal 
                             content={
-                                <AddCard members={this.props.boardData.boards[this.props.match.params.boardId].members} addCard={this.addEditedCardToDBHandler} editCard={true} cardData={this.state.selectedCardData} />
+                                <AddCard members={this.props.boardData.boards[this.props.match.params.boardId].members} addCard={this.addEditedCardToDBHandler} editCard={true} cardData={this.state.selectedCardData} boardID={this.props.match.params.boardId} columnID={this.state.addCardToColumnID} />
                             } 
                             close={this.closeEditModalHandler} 
                         /> : 
