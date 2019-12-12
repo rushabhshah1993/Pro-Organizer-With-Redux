@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom';
 import styles from './Board.css';
 import createBoardStyles from './../CreateBoard/CreateBoard.css';
@@ -9,6 +10,7 @@ import CardInfo from './../../components/CardInfo/CardInfo';
 import AddCard from './../../components/AddCard/AddCard';
 import { toSnakeCase } from './../../utility';
 import Axios from 'axios';
+import * as actions from './../../store/actions/index';
 
 class Board extends Component {
     constructor(props) {
@@ -143,30 +145,31 @@ class Board extends Component {
     }
 
     addColumnToDBHandler = () => {
+        let columnBoardData = this.props.boardData.boards[this.props.match.params.boardId];
+        let updatedBoardData = {...this.props.boardData};
         let column_name = this.addColumnRef.current.value;
         let column_id = toSnakeCase(column_name);
         let newColumn = {
             id: column_id,
             name: column_name
         }
-        let columns = this.state.boardData.columns || [];
+        let columns = columnBoardData.columns || [];
         columns.push(newColumn);
-        let boardData = {...this.state.boardData};
-        boardData.columns = columns;
+        columnBoardData.columns = columns;
+        updatedBoardData.boards[this.props.match.params.boardId] = columnBoardData;
         
         this.setState({
             addColumnLoading: true
         })
 
-        Axios.put('https://pro-organizer-f83b5.firebaseio.com/boardData/-LuM4blPg67eyvzgAzwn/boards/'+this.state.boardData.id+'/columns.json', columns)
+        Axios.put('https://pro-organizer-f83b5.firebaseio.com/boardData/-LuM4blPg67eyvzgAzwn.json', updatedBoardData)
             .then(response => {
+                this.props.updateBoardData(updatedBoardData)
                 this.setState({
                     showAddColumnModal: false,
-                    boardData: boardData,
                     addColumnLoading: false
                 })
             })
-            .catch(error => {console.log(error)});
     }
 
     editCardHandler = (column_id) => {
@@ -280,9 +283,10 @@ class Board extends Component {
     }
 
     render() {
+        console.log(this.props, this.state);
         let content = null;
-        if(Object.keys(this.state.boardData).length > 0) {
-            let dataOfBoard = {...this.state.boardData};
+        if(Object.keys(this.props.boardData).length > 0) {
+            let dataOfBoard = {...this.props.boardData.boards[this.props.match.params.boardId]};
             dataOfBoard.cards = dataOfBoard.cards || [];
             let columns = null;
             if(dataOfBoard.columns !== undefined) {
@@ -370,4 +374,16 @@ class Board extends Component {
     }
 }
 
-export default withRouter(Board);
+const mapStateToProps = state => {
+    return {
+        boardData: state.boards.boardData
+    }
+}
+
+const mapDispatchToProps = dispatch => {
+    return {
+        updateBoardData: (data) => dispatch(actions.updateBoardData(data))
+    }
+}
+
+export default withRouter(connect(mapStateToProps, mapDispatchToProps)(Board));
