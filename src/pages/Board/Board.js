@@ -114,28 +114,11 @@ class Board extends Component {
             .catch(error => {console.log(error)});
     }
 
-    addCardToDBHandler = (values) => {
-        let columnBoardData = {...this.props.boardData.boards[this.props.match.params.boardId]};
-        let updatedBoardData = {...this.props.boardData};
-
-        values['due_date'] = values['due_date'] !== null ? new Date(values['due_date']).getTime() : null;
-        values['board_id'] = columnBoardData.id;
-        values['column'] = this.state.addCardToColumnID;
-        values['id'] = columnBoardData.cards ? columnBoardData.cards.slice(-1)[0].id + 1 : 0;
-        
-        let cards = [...columnBoardData.cards] || [];
-        cards.push(values);
-        columnBoardData.cards = cards;
-        updatedBoardData.boards[this.props.match.params.boardId] = columnBoardData;
-        Axios.put('https://pro-organizer-f83b5.firebaseio.com/boardData/-LuM4blPg67eyvzgAzwn.json', updatedBoardData)
-            .then(response => {
-                this.props.updateBoardData(updatedBoardData);
-                this.setState({
-                    showAddCardModal: false,
-                    addCardToColumnID: null
-                })
-            })
-            .catch(error => {console.log(error);})
+    addCardToDBHandler = () => {
+        this.setState({
+            showAddCardModal: false,
+            addCardToColumnID: null
+        })
     }
 
     addColumnHandler = () => {
@@ -282,7 +265,7 @@ class Board extends Component {
     }
 
     render() {
-        console.log(this.props, this.state);
+        // console.log(this.props, this.state);
         let content = null;
         if(Object.keys(this.props.boardData).length > 0) {
             let dataOfBoard = {...this.props.boardData.boards[this.props.match.params.boardId]};
@@ -316,7 +299,7 @@ class Board extends Component {
                         this.state.showAddCardModal ?
                         <Modal 
                             content={
-                                <AddCard members={this.state.boardData.members} addCard={this.addCardToDBHandler} />
+                                <AddCard members={this.state.boardData.members} addCard={this.addCardToDBHandler} boardID={this.props.match.params.boardId} columnID={this.state.addCardToColumnID} />
                             } 
                             close={this.closeAddCardModalHandler} 
                         /> : 

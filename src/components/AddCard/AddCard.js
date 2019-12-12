@@ -1,9 +1,11 @@
 import React, { Component } from 'react';
+import { connect } from 'react-redux';
 import styles from './AddCard.css';
 import boardStyles from './../../pages/Board/Board.css';
 import createBoardStyles from './../../pages/CreateBoard/CreateBoard.css';
 
 import FormElements from './../FormElements/FormElements';
+import Axios from 'axios';
 
 class AddCard extends Component {    
     state = {
@@ -62,12 +64,28 @@ class AddCard extends Component {
     }
 
     addCardHandler = () => {
+        let columnBoardData = {...this.props.boardData.boards[this.props.boardID]};
+        let updatedBoardData = {...this.props.boardData};
+
         let values = {};
         let formElements = this.state.formElements
         for(let key in formElements) {
             values[formElements[key].id] = formElements[key].value;
         }
-        this.props.addCard(values);
+        values['board_id'] = columnBoardData.id;
+        values['column'] = this.props.columnID;
+        values['id'] = columnBoardData.cards ? columnBoardData.cards.slice(-1)[0].id + 1 : 0;
+
+        let cards = [...columnBoardData.cards] || [];
+        cards.push(values);
+
+        columnBoardData.cards = cards;
+
+        updatedBoardData.boards[this.props.boardID] = columnBoardData;
+
+        Axios.put('https://pro-organizer-f83b5.firebaseio.com/boardData/-LuM4blPg67eyvzgAzwn.json', updatedBoardData)
+            .then(response => {this.props.addCard()})
+            .catch(error => {console.log(error)});
     }
 
     formChangeHandler = (id, value) => {
@@ -85,6 +103,7 @@ class AddCard extends Component {
     }
 
     render() {
+        console.log(this.props);
         let formElements = this.state.formElements.map(element => {
             const ref = React.createRef();
             return <FormElements element={element} reference={ref} key={element.id} options={element.id === 'members' && this.props.members} changed={this.formChangeHandler} />
@@ -100,4 +119,10 @@ class AddCard extends Component {
     }
 }
 
-export default AddCard;
+const mapStateToProps = state => {
+    return {
+        boardData: state.boards.boardData
+    };
+}
+
+export default connect(mapStateToProps)(AddCard);
