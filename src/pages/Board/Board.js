@@ -211,8 +211,9 @@ class Board extends Component {
     }
 
     droppedCardHandler = (received_card, receiving_column) => {
-        let boardData = {...this.state.boardData};
-        let cards = [...this.state.boardData.cards];
+        let updatedBoardData = {...this.props.boardData};
+        let columnBoardData = {...this.props.boardData.boards[this.props.match.params.boardId]};
+        let cards = columnBoardData.cards;
         let updatedCards = cards.filter(card => {
             if(card.id === received_card.id) {
                 card.column = receiving_column;
@@ -221,14 +222,11 @@ class Board extends Component {
                 return card;
             }
         });
-        boardData.cards = updatedCards;
-        Axios.put('https://pro-organizer-f83b5.firebaseio.com/boardData/-LuM4blPg67eyvzgAzwn/boards/'+this.state.boardData.id+'/cards.json', updatedCards)
-            .then(response => {
-                this.setState({
-                    boardData: boardData
-                })
-            })
-            .catch(error => {console.log(error)});
+        columnBoardData.cards = updatedCards;
+        updatedBoardData.boards[this.props.match.params.boardId] = columnBoardData;
+        Axios.put('https://pro-organizer-f83b5.firebaseio.com/boardData/-LuM4blPg67eyvzgAzwn.json', updatedBoardData)
+            .then(response => {this.props.updateBoardData(updatedBoardData);})
+            .catch(error => {console.log(error);})
     }
 
     render() {
