@@ -177,29 +177,25 @@ class Board extends Component {
     }
 
     deleteBoardHandler = () => {
-        console.log('Here');
-        Axios.get('https://pro-organizer-f83b5.firebaseio.com/boardData/-LuM4blPg67eyvzgAzwn.json')
+        let updatedBoardData = {...this.props.boardData};
+        let allBoards = updatedBoardData.allBoards;
+        let boards = updatedBoardData.boards;
+        let updatedAllBoards = allBoards.filter(board => {
+            return board.id !== this.props.match.params.boardId;
+        })
+        let updatedBoards = {};
+        for(let board of Object.keys(boards)) {
+            if(board !== this.props.match.params.boardId) {
+                updatedBoards[board] = boards[board];
+            }
+        }
+        updatedBoardData.allBoards = updatedAllBoards;
+        updatedBoardData.boards = updatedBoards;
+
+        Axios.put('https://pro-organizer-f83b5.firebaseio.com/boardData/-LuM4blPg67eyvzgAzwn.json', updatedBoardData)
             .then(response => {
-                let appData = {...response.data};
-                let allBoards = appData.allBoards;
-                let boards = appData.boards;
-                let updatedAllBoards = allBoards.filter(board => {
-                    return board.id !== this.state.boardData.id;
-                })
-                let updatedBoards = {};
-                for(let board of Object.keys(boards)) {
-                    if(board !== this.state.boardData.id) {
-                        updatedBoards[board] = boards[board];
-                    }
-                }
-                appData.allBoards = updatedAllBoards;
-                appData.boards = updatedBoards;
-                
-                Axios.put('https://pro-organizer-f83b5.firebaseio.com/boardData/-LuM4blPg67eyvzgAzwn.json', appData)
-                    .then(response => {
-                        this.props.history.push('/');
-                    })
-                    .catch(error => {console.log(error);})
+                this.props.updateBoardData(updatedBoardData);
+                this.props.history.push('/');
             })
             .catch(error => {console.log(error);})
     }
@@ -230,7 +226,7 @@ class Board extends Component {
     }
 
     render() {
-        // console.log(this.props, this.state);
+        console.log(this.props, this.state);
         let content = null;
         if(Object.keys(this.props.boardData).length > 0) {
             let dataOfBoard = {...this.props.boardData.boards[this.props.match.params.boardId]};
@@ -299,7 +295,7 @@ class Board extends Component {
                         /> :
                         null}
                     <div className={styles.BoardHeader}>
-                        <p className={styles.BoardTitle}>{this.state.boardData.name} Board</p>
+                        <p className={styles.BoardTitle}>{this.props.boardData.boards[this.props.match.params.boardId].name} Board</p>
                         <button className={createBoardStyles.CreateButton} style={{backgroundColor: 'red', width: 'auto'}} onClick={this.deleteBoardHandler}>Delete Board</button>
                     </div>
                     <div className={styles.ColumnsContainer}>
