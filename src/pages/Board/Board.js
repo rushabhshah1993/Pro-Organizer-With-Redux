@@ -151,31 +151,10 @@ class Board extends Component {
         })
     }
 
-    archiveCardHandler = (archived_card) => {
-        let archivedCards = [...this.state.archivedCards];
-        archivedCards.push(archived_card);
-
-        let boardData = {...this.state.boardData};
-        let cards = boardData.cards;
-        let updatedCards = cards.filter(card => {return card.id !== archived_card.id;})
-        boardData.cards = updatedCards;
-        
-        Axios.put('https://pro-organizer-f83b5.firebaseio.com/boardData/-LuM4blPg67eyvzgAzwn/archivedCards.json', archivedCards)
-            .then(response => {
-                this.setState({
-                    archivedCards: archivedCards,
-                    showModal: false
-                })
-
-                Axios.put('https://pro-organizer-f83b5.firebaseio.com/boardData/-LuM4blPg67eyvzgAzwn/boards/'+this.state.boardData.id+'/cards.json', updatedCards)
-                    .then(response => {
-                        this.setState({
-                            boardData: boardData
-                        })
-                    })
-                    .catch(error => {console.log(error);})
-            })
-            .catch(error => {console.log(error);})
+    archiveCardHandler = () => {
+        this.setState({
+            showModal: false
+        })
     }
 
     deleteColumnHandler = (column_id) => {
