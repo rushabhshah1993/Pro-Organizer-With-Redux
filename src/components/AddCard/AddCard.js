@@ -75,8 +75,7 @@ class AddCard extends Component {
         values['board_id'] = columnBoardData.id;
         values['column'] = this.props.columnID;
         values['id'] = columnBoardData.cards ? columnBoardData.cards.slice(-1)[0].id + 1 : 0;
-        values['due_date'] = values['due_date'] !== 'NaN-NaN-NaN' ? new Date(values['due_date']).getTime() : null;
-
+        values['due_date'] = values['due_date'] !== 'NaN-NaN-NaN' && values['due_date'] !== null ? new Date(values['due_date']).getTime() : null;
 
         if(this.props.editCard) {
             let id = this.props.cardData.card[0].id;
