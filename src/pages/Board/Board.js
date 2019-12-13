@@ -226,7 +226,6 @@ class Board extends Component {
     }
 
     render() {
-        console.log(this.props, this.state);
         let content = null;
         if(Object.keys(this.props.boardData).length > 0) {
             let dataOfBoard = {...this.props.boardData.boards[this.props.match.params.boardId]};
