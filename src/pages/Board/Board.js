@@ -26,7 +26,9 @@ class Board extends Component {
         boardData: {},
         showAddColumnModal: false,
         showEditModal: false,
-        archivedCards: []
+        archivedCards: [],
+        noColumnName: false,
+        columnName: ''
     }
 
     componentDidMount() {
@@ -109,38 +111,52 @@ class Board extends Component {
         })
     }
 
-    addColumnHandler = () => {
+    addColumnHandler = (event) => {
         this.setState({
             showAddColumnModal: true
         })
     }
 
-    addColumnToDBHandler = () => {
-        let columnBoardData = this.props.boardData.boards[this.props.match.params.boardId];
-        let updatedBoardData = {...this.props.boardData};
-        let column_name = this.addColumnRef.current.value;
-        let column_id = toSnakeCase(column_name);
-        let newColumn = {
-            id: column_id,
-            name: column_name
-        }
-        let columns = columnBoardData.columns || [];
-        columns.push(newColumn);
-        columnBoardData.columns = columns;
-        updatedBoardData.boards[this.props.match.params.boardId] = columnBoardData;
-        
+    columnNameChangeHandler = (event) => {
         this.setState({
-            addColumnLoading: true
+            columnName: event.target.value,
+            noColumnName: event.target.value.length > 0 ? false : true
         })
+    }
 
-        Axios.put('https://pro-organizer-f83b5.firebaseio.com/boardData/-LuM4blPg67eyvzgAzwn.json', updatedBoardData)
-            .then(response => {
-                this.props.updateBoardData(updatedBoardData)
-                this.setState({
-                    showAddColumnModal: false,
-                    addColumnLoading: false
-                })
+    addColumnToDBHandler = () => {
+        if(this.addColumnRef.current.value.length <= 0) {
+            this.setState({
+                noColumnName: true
             })
+        } else {
+            let columnBoardData = this.props.boardData.boards[this.props.match.params.boardId];
+            let updatedBoardData = {...this.props.boardData};
+            let column_name = this.addColumnRef.current.value;
+            let column_id = toSnakeCase(column_name);
+            let newColumn = {
+                id: column_id,
+                name: column_name
+            }
+            let columns = columnBoardData.columns || [];
+            columns.push(newColumn);
+            columnBoardData.columns = columns;
+            updatedBoardData.boards[this.props.match.params.boardId] = columnBoardData;
+            
+            this.setState({
+                addColumnLoading: true,
+                columnName: ''
+            })
+    
+            Axios.put('https://pro-organizer-f83b5.firebaseio.com/boardData/-LuM4blPg67eyvzgAzwn.json', updatedBoardData)
+                .then(response => {
+                    this.props.updateBoardData(updatedBoardData)
+                    this.setState({
+                        showAddColumnModal: false,
+                        addColumnLoading: false
+                    })
+                })
+        }
     }
 
     editCardHandler = (column_id) => {
@@ -160,15 +176,18 @@ class Board extends Component {
     deleteColumnHandler = (column_id) => {
         let updatedBoardData = {...this.props.boardData};
         let columnBoardData = {...this.props.boardData.boards[this.props.match.params.boardId]};
-        let cards = columnBoardData.cards;
+        let updatedCards = null;
+        if(columnBoardData.cards !== undefined) {
+            let cards = columnBoardData.cards;
+            updatedCards = cards.filter(card => {
+                return card.column !== column_id;
+            })
+            columnBoardData.cards = updatedCards;
+        }
         let columns = columnBoardData.columns;
-        let updatedCards = cards.filter(card => {
-            return card.column !== column_id;
-        })
         let updatedColumns = columns.filter(column => {
             return column.id !== column_id;
         })
-        columnBoardData.cards = updatedCards;
         columnBoardData.columns = updatedColumns;
         updatedBoardData.boards[this.props.match.params.boardId] = columnBoardData;
         Axios.put('https://pro-organizer-f83b5.firebaseio.com/boardData/-LuM4blPg67eyvzgAzwn.json', updatedBoardData)
@@ -283,9 +302,10 @@ class Board extends Component {
                                 <span>Creating your column...</span> :
                                 <>
                                     <p className={styles.BoardTitle}>Add column</p>
+                                    {this.state.noColumnName ? <span style={{color: 'red'}}>Please add a column name</span> : null}
                                     <div style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}}>
                                         <p>Enter a column name:</p>
-                                        <input type='text' ref={this.addColumnRef} style={{width: '100%'}} />
+                                        <input type='text' ref={this.addColumnRef} value={this.state.columnName} onChange={this.columnNameChangeHandler} style={{width: '100%'}} />
                                     </div>
                                     <button className={createBoardStyles.CreateButton} style={{width: 'auto', float: 'right'}} onClick={this.addColumnToDBHandler}>Add Column</button>
                                 </>
