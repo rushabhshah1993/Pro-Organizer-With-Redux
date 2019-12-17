@@ -194,8 +194,8 @@ class Board extends Component {
 
         Axios.put('https://pro-organizer-f83b5.firebaseio.com/boardData/-LuM4blPg67eyvzgAzwn.json', updatedBoardData)
             .then(response => {
-                this.props.updateBoardData(updatedBoardData);
                 this.props.history.push('/');
+                this.props.updateBoardData(updatedBoardData);
             })
             .catch(error => {console.log(error);})
     }
