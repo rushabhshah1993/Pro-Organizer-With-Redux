@@ -5,7 +5,7 @@ import { connect } from 'react-redux';
 import boardStyles from './../Board/Board.css';
 import styles from './Boards.css';
 
-class Boards extends Component {
+export class Boards extends Component {
     render() {
         let boards = <div className={styles.Loading}>Loading...</div>;
 

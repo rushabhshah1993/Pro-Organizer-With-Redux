@@ -8,7 +8,7 @@ import Axios from 'axios';
 
 import * as actions from './../../store/actions/index';
 
-class CreateBoard extends Component {
+export class CreateBoard extends Component {
     constructor(props) {
         super(props);
         this.boardNameRef = React.createRef();
